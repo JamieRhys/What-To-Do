@@ -1,0 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS table_todo_lists(
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY UNIQUE,
+    name VARCHAR NOT NULL
+);
