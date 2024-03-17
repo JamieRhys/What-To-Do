@@ -28,3 +28,7 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '21'
+      - name: Build and test
+        run: |
+          echo "spring.profiles.active=test" > src/main/resources/application.properties
+          ./gradlew build test
