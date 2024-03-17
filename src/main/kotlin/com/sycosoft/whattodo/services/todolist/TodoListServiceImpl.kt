@@ -14,6 +14,7 @@ import java.util.*
 class TodoListServiceImpl(
     private val todoListRepository: TodoListRepository
 ) : TodoListService {
+
     override fun saveTodoList(todoList: TodoList): TodoList {
         if (!(todoList.name.isNotBlank() && todoList.name.length <= 50)) {
             throw TodoListInvalidObjectException(AppStrings.Exceptions.TODO_LIST_INVALID_OBJECT_EXCEPTION + "Must have a name.")
