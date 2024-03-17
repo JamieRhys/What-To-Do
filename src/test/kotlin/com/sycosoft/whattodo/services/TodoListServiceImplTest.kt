@@ -91,7 +91,7 @@ class TodoListServiceImplTest {
 
     @Test
     fun whenValidNameChangeGiven_thenUpdateTodoList() {
-        val test = todoList
+        val test = todoList.copy()
         test.name = AppStrings.Testing.TodoList.TODO_LIST_UPDATED_NAME
         `when`(repository.save(test)).thenReturn(test)
 
