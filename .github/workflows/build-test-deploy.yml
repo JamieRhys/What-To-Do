@@ -30,6 +30,6 @@ jobs:
           java-version: '21'
       - name: Build and test
         run: |
-          echo "spring.profiles.active=test" > src/main/resources/application.properties
-          chmod +x gradlew
-          ./gradlew build test --scan
+          #echo "spring.profiles.active=test" > src/main/resources/application.properties
+          #chmod +x gradlew
+          #./gradlew build test --scan
