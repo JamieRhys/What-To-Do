@@ -3,8 +3,10 @@ package com.sycosoft.whattodo.services
 import com.sycosoft.whattodo.AppStrings
 import com.sycosoft.whattodo.database.entities.TodoList
 import com.sycosoft.whattodo.database.repositories.TodoListRepository
+import com.sycosoft.whattodo.exceptions.TodoListDeletionException
 import com.sycosoft.whattodo.exceptions.TodoListInvalidObjectException
 import com.sycosoft.whattodo.exceptions.TodoListNotFoundException
+import com.sycosoft.whattodo.exceptions.TodoListUpdateException
 import com.sycosoft.whattodo.services.todolist.TodoListService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -54,7 +56,7 @@ class TodoListServiceImplTest {
         val exception = assertThrows<TodoListInvalidObjectException> { todoListService.saveTodoList(invalidTodoList) }
 
         verify(repository, never()).save(invalidTodoList)
-        assertEquals(AppStrings.Exceptions.TODO_LIST_INVALID_OBJECT_EXCEPTION, exception.message)
+        assertEquals(AppStrings.Exceptions.TODO_LIST_INVALID_OBJECT_EXCEPTION + "Must have a name.", exception.message)
     }
 
     @Test
@@ -85,5 +87,73 @@ class TodoListServiceImplTest {
         val exception = assertThrows<TodoListNotFoundException> { todoListService.findTodoListByName(AppStrings.Testing.TodoList.TODO_LIST_INVALID_NAME) }
 
         assertEquals(AppStrings.Exceptions.TODO_LIST_NOT_FOUND_EXCEPTION + AppStrings.Testing.TodoList.TODO_LIST_INVALID_NAME, exception.message)
+    }
+
+    @Test
+    fun whenValidNameChangeGiven_thenUpdateTodoList() {
+        val test = todoList
+        test.name = AppStrings.Testing.TodoList.TODO_LIST_UPDATED_NAME
+        `when`(repository.save(test)).thenReturn(test)
+
+        val updatedTodoList = todoListService.updateTodoList(test)
+
+        verify(repository, atLeastOnce()).save(updatedTodoList)
+        assertEquals(AppStrings.Testing.TodoList.TODO_LIST_UPDATED_NAME, updatedTodoList.name)
+    }
+
+    @Test
+    fun whenInvalidUUIDGivenToUpdateTodoList_thenThrowException() {
+        val invalidUUID = UUID.randomUUID()
+        val testTodoList = TodoList.Builder()
+            .uuid(invalidUUID)
+            .name(AppStrings.Testing.TodoList.TODO_LIST_UPDATED_NAME)
+            .build()
+
+        val exception = assertThrows<TodoListUpdateException> { todoListService.updateTodoList(testTodoList) }
+
+        verify(repository, never()).save(testTodoList)
+        assertEquals(AppStrings.Exceptions.TODO_LIST_UPDATE_EXCEPTION + AppStrings.Exceptions.TODO_LIST_NOT_FOUND_EXCEPTION + invalidUUID, exception.message)
+    }
+
+    @Test
+    fun whenNoChangeGiven_thenTodoListNotUpdated() {
+        `when`(repository.save(todoList)).thenReturn(todoList)
+
+        val exception = assertThrows<TodoListUpdateException> { todoListService.updateTodoList(todoList) }
+
+        verify(repository, never()).save(todoList)
+        assertEquals(AppStrings.Exceptions.TODO_LIST_UPDATE_EXCEPTION + "Nothing to update", exception.message)
+    }
+
+    @Test
+    fun whenValidTodoListUUIDGiven_thenDeleteTodoList() {
+        todoList.uuid?.let { todoListService.deleteTodoList(it) }
+
+        verify(repository, atLeastOnce()).delete(todoList)
+    }
+
+    @Test
+    fun whenInvalidTodoListUUIDGiven_thenThrowException() {
+        val invalidUUID = UUID.randomUUID()
+
+        val exception = assertThrows<TodoListDeletionException> { todoListService.deleteTodoList(invalidUUID) }
+
+        verify(repository, never()).deleteById(invalidUUID)
+        assertEquals(AppStrings.Exceptions.TODO_LIST_DELETION_EXCEPTION + AppStrings.Exceptions.TODO_LIST_NOT_FOUND_EXCEPTION + invalidUUID, exception.message)
+    }
+
+    @Test
+    fun whenValidTodoListNameGiven_thenDeleteTodoList() {
+        todoListService.deleteTodoList(todoList.name)
+
+        verify(repository, atLeastOnce()).delete(todoList)
+    }
+
+    @Test
+    fun whenInvalidTodoListNameGiven_thenThrowException() {
+        val exception = assertThrows<TodoListDeletionException> { todoListService.deleteTodoList(AppStrings.Testing.TodoList.TODO_LIST_INVALID_NAME) }
+
+        verify(repository, never()).delete(todoList)
+        assertEquals(AppStrings.Exceptions.TODO_LIST_DELETION_EXCEPTION + AppStrings.Exceptions.TODO_LIST_NOT_FOUND_EXCEPTION + AppStrings.Testing.TodoList.TODO_LIST_INVALID_NAME, exception.message)
     }
 }
