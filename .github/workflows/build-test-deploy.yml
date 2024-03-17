@@ -31,4 +31,4 @@ jobs:
       - name: Build and test
         run: |
           echo "spring.profiles.active=test" > src/main/resources/application.properties
-          ./gradlew build test
+          chmod +x ./gradlew build test
