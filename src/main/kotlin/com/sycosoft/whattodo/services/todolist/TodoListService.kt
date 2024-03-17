@@ -8,7 +8,9 @@ interface TodoListService {
     fun updateTodoList(todoList: TodoList): TodoList
     fun deleteTodoList(todoList: TodoList)
     fun deleteTodoList(uuid: UUID)
+    fun deleteTodoList(name: String)
 
+    fun findAllTodoLists(): List<TodoList>
     fun findTodoListByUUID(uuid: UUID): TodoList
     fun findTodoListByName(name: String): TodoList
 }
